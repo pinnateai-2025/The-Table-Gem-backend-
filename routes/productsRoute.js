@@ -5,12 +5,12 @@ const productController = require("../controllers/productsController");
 
 const router = express.Router();
 
-// Public Routes
+// Public
 router.get("/", productController.getAllProducts);
 router.get("/search", productController.searchProducts);
 router.get("/:id", productController.getProduct);
 
-// Admin Routes
+// Admin
 router.post(
   "/",
   authMiddleware(["admin"]),

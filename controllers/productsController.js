@@ -1,11 +1,8 @@
+const { Product, Category, User } = require("../models");
 const { Op } = require("sequelize");
-const { validationResult } = require("express-validator");
-const Product = require("../models/productsModel");
-const Category = require("../models/categoriesModel");
-const User = require("../models/usersModel");
 
-// List all products (with category & creator)
-exports.getAllProducts = async (req, res) => {
+// ======================= Get all products =======================
+exports.getAllProducts = async (req, res, next) => {
   try {
     const products = await Product.findAll({
       include: [
@@ -15,12 +12,12 @@ exports.getAllProducts = async (req, res) => {
     });
     res.json(products);
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    next(err);
   }
 };
 
-// Get product details
-exports.getProduct = async (req, res) => {
+// ======================= Get product by ID ======================
+exports.getProduct = async (req, res, next) => {
   try {
     const product = await Product.findByPk(req.params.id, {
       include: [
@@ -28,79 +25,26 @@ exports.getProduct = async (req, res) => {
         { model: User, as: "creator", attributes: ["id", "name", "email"] },
       ],
     });
-    if (!product) return res.status(404).json({ message: "Product not found" });
-    res.json(product);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-};
 
-// Create product
-exports.createProduct = async (req, res) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
-
-  try {
-    const { name, description, price, stock, image_url, categoryId } = req.body;
-
-    const category = await Category.findByPk(categoryId);
-    if (!category) return res.status(404).json({ message: "Category not found" });
-
-    const product = await Product.create({
-      name,
-      description,
-      price,
-      stock,
-      image_url,
-      categoryId,
-      createdBy: req.user.id,
-    });
-
-    res.status(201).json({ message: "Product created successfully", product });
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-};
-
-// Update product
-exports.updateProduct = async (req, res) => {
-  try {
-    const { name, description, price, stock, image_url, categoryId } = req.body;
-    const product = await Product.findByPk(req.params.id);
-
-    if (!product) return res.status(404).json({ message: "Product not found" });
-
-    if (categoryId) {
-      const category = await Category.findByPk(categoryId);
-      if (!category) return res.status(404).json({ message: "Category not found" });
+    if (!product) {
+      res.status(404);
+      throw new Error("Product not found");
     }
 
-    await product.update({ name, description, price, stock, image_url, categoryId });
-
-    res.json({ message: "Product updated successfully", product });
+    res.json(product);
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    next(err);
   }
 };
 
-// Delete product
-exports.deleteProduct = async (req, res) => {
-  try {
-    const product = await Product.findByPk(req.params.id);
-    if (!product) return res.status(404).json({ message: "Product not found" });
-
-    await product.destroy();
-    res.json({ message: "Product deleted successfully" });
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-};
-
-// Search products by name/description
-exports.searchProducts = async (req, res) => {
+// ======================== Search products =======================
+exports.searchProducts = async (req, res, next) => {
   try {
     const { q } = req.query;
-    if (!q) return res.status(400).json({ message: "Search query missing" });
+    if (!q) {
+      res.status(400);
+      throw new Error("Search query is required");
+    }
 
     const products = await Product.findAll({
       where: {
@@ -109,11 +53,90 @@ exports.searchProducts = async (req, res) => {
           { description: { [Op.like]: `%${q}%` } },
         ],
       },
-      include: [{ model: Category, as: "category", attributes: ["id", "name"] }],
+      include: [
+        { model: Category, as: "category", attributes: ["id", "name"] },
+        { model: User, as: "creator", attributes: ["id", "name", "email"] },
+      ],
     });
 
     res.json(products);
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    next(err);
+  }
+};
+
+// ======================= Create a new product (Admin only) ======
+exports.createProduct = async (req, res, next) => {
+  try {
+    const { name, description, price, stock, imageUrl, categoryId } = req.body;
+
+    const category = await Category.findByPk(categoryId);
+    if (!category) {
+      res.status(404);
+      throw new Error("Category not found");
+    }
+
+    const product = await Product.create({
+      name,
+      description,
+      price,
+      stock,
+      imageUrl,
+      categoryId,
+      createdBy: req.user.id,
+    });
+
+    res.status(201).json(product);
+  } catch (err) {
+    next(err);
+  }
+};
+
+// ======================= Update a product (Admin only) ==========
+exports.updateProduct = async (req, res, next) => {
+  try {
+    const { name, description, price, stock, imageUrl, categoryId } = req.body;
+
+    const product = await Product.findByPk(req.params.id);
+    if (!product) {
+      res.status(404);
+      throw new Error("Product not found");
+    }
+
+    if (categoryId) {
+      const category = await Category.findByPk(categoryId);
+      if (!category) {
+        res.status(404);
+        throw new Error("Category not found");
+      }
+      product.categoryId = categoryId;
+    }
+
+    product.name = name || product.name;
+    product.description = description || product.description;
+    product.price = price || product.price;
+    product.stock = stock || product.stock;
+    product.imageUrl = imageUrl || product.imageUrl;
+
+    await product.save();
+    res.json(product);
+  } catch (err) {
+    next(err);
+  }
+};
+
+// ======================= Delete a product (Admin only) ==========
+exports.deleteProduct = async (req, res, next) => {
+  try {
+    const product = await Product.findByPk(req.params.id);
+    if (!product) {
+      res.status(404);
+      throw new Error("Product not found");
+    }
+
+    await product.destroy();
+    res.json({ message: "Product deleted successfully" });
+  } catch (err) {
+    next(err);
   }
 };
