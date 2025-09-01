@@ -1,20 +1,19 @@
 const express = require("express");
 const morgan = require("morgan");
 const sequelize = require("./config");
-const authRoutes = require("./routes/authRoute");
-const categoriesRoute = require("./routes/categoriesRoute");
-const productsRoute = require("./routes/productsRoute");
+const route = require("./routes/index"); 
+const { errorHandler } = require("./middlewares/errorMiddleware");
 require("dotenv").config();
+
 
 const app = express();
 app.use(express.json());
 app.use(morgan("dev"));
 
+app.use("/api", route);
 
-// Routes
-app.use("/api/auth", authRoutes);
-app.use("/api/categories", categoriesRoute);
-app.use("/api/products", productsRoute);
+// error handler (always last)
+app.use(errorHandler);
 
 sequelize.sync({ alter: true }).then(() => {
   console.log("Database connected");

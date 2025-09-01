@@ -5,11 +5,11 @@ const categoryController = require("../controllers/categoriesController");
 
 const router = express.Router();
 
-// Public routes
+// Public
 router.get("/", categoryController.getAllCategories);
 router.get("/:id", categoryController.getCategory);
 
-// Admin-only routes
+// Admin Only
 router.post(
   "/",
   authMiddleware(["admin"]),
