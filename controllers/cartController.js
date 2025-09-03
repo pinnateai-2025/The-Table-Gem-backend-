@@ -8,7 +8,14 @@ exports.getCart = async (req, res, next) => {
       include: [
         {
           model: CartItem,
-          include: [{ model: Product, attributes: ["id", "name", "price", "image_url"] }],
+          as: "items",
+          include: [
+            {
+              model: Product,
+              as: "product",
+              attributes: ["id", "name", "price", "image_url"]
+            }
+          ],
         },
       ],
     });

@@ -1,26 +1,37 @@
-// associations/association.js
 const applyAssociations = (db) => {
-  const { User, Product, Category, Cart, CartItem } = db;
+  const { User, Product, Category, Cart, CartItem, Order, OrderItem } = db;
 
-  // User ↔ Cart
-  User.hasOne(Cart, { foreignKey: "userId", onDelete: "CASCADE" });
-  Cart.belongsTo(User, { foreignKey: "userId" });
+  // ================= USER ↔ CART =================
+  User.hasOne(Cart, { foreignKey: "userId", onDelete: "CASCADE", as: "cart" });
+  Cart.belongsTo(User, { foreignKey: "userId", as: "user" });
 
-  // Cart ↔ CartItem
-  Cart.hasMany(CartItem, { foreignKey: "cartId", onDelete: "CASCADE" });
-  CartItem.belongsTo(Cart, { foreignKey: "cartId" });
+  // ================= CART ↔ CARTITEM =================
+  Cart.hasMany(CartItem, { foreignKey: "cartId", onDelete: "CASCADE", as: "items" });
+  CartItem.belongsTo(Cart, { foreignKey: "cartId", as: "cart" });
 
-  // Product ↔ CartItem
-  Product.hasMany(CartItem, { foreignKey: "productId", onDelete: "CASCADE" });
-  CartItem.belongsTo(Product, { foreignKey: "productId" });
+  // ================= PRODUCT ↔ CARTITEM =================
+  Product.hasMany(CartItem, { foreignKey: "productId", onDelete: "CASCADE", as: "cartItems" });
+  CartItem.belongsTo(Product, { foreignKey: "productId", as: "product" });
 
-  // Category ↔ Product
+  // ================= CATEGORY ↔ PRODUCT =================
   Category.hasMany(Product, { foreignKey: "categoryId", as: "products" });
   Product.belongsTo(Category, { foreignKey: "categoryId", as: "category" });
 
-  // User ↔ Product
+  // ================= USER ↔ PRODUCT =================
   User.hasMany(Product, { foreignKey: "createdBy", as: "createdProducts" });
   Product.belongsTo(User, { foreignKey: "createdBy", as: "creator" });
+
+  // ================= USER ↔ ORDER =================
+  User.hasMany(Order, { foreignKey: "userId", as: "orders" });
+  Order.belongsTo(User, { foreignKey: "userId", as: "user" });
+
+  // ================= ORDER ↔ ORDERITEM =================
+  Order.hasMany(OrderItem, { foreignKey: "orderId", as: "items" });
+  OrderItem.belongsTo(Order, { foreignKey: "orderId", as: "order" });
+
+  // ================= PRODUCT ↔ ORDERITEM =================
+  Product.hasMany(OrderItem, { foreignKey: "productId", as: "orderItems" });
+  OrderItem.belongsTo(Product, { foreignKey: "productId", as: "product" });
 };
 
 module.exports = { applyAssociations };
