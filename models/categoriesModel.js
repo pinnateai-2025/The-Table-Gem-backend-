@@ -11,9 +11,14 @@ module.exports = (sequelize, DataTypes) => {
       unique: true,
       validate: { notEmpty: { msg: "Category name is required" } },
     },
-    description: {
-      type: DataTypes.STRING,
+    parentId: {
+      type: DataTypes.INTEGER,
       allowNull: true,
+      references: {
+        model: "Categories",
+        key: "id",
+      },
+      onDelete: "CASCADE",
     },
   });
 

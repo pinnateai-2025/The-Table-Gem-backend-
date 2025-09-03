@@ -27,6 +27,7 @@ router.post(
 router.put(
   "/:id",
   authMiddleware(["admin"]),
+  upload.single("image_url"), 
   [
     body("name").optional().notEmpty().withMessage("Name cannot be empty"),
     body("price").optional().isFloat({ gt: 0 }).withMessage("Price must be positive"),

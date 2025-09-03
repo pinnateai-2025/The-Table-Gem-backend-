@@ -17,6 +17,11 @@ const applyAssociations = (db) => {
   Category.hasMany(Product, { foreignKey: "categoryId", as: "products" });
   Product.belongsTo(Category, { foreignKey: "categoryId", as: "category" });
 
+  // ================= CATEGORY ↔ SUBCATEGORY (Self Association) =================
+  Category.hasMany(Category, { foreignKey: "parentId", as: "subcategories" });
+  Category.belongsTo(Category, { foreignKey: "parentId", as: "parent" });
+
+
   // ================= USER ↔ PRODUCT =================
   User.hasMany(Product, { foreignKey: "createdBy", as: "createdProducts" });
   Product.belongsTo(User, { foreignKey: "createdBy", as: "creator" });
