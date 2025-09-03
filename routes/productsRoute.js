@@ -1,7 +1,9 @@
 const express = require("express");
 const { body } = require("express-validator");
 const authMiddleware = require("../middlewares/authMiddleware");
+const upload = require("../middlewares/uploads")
 const productController = require("../controllers/productsController");
+
 
 const router = express.Router();
 
@@ -33,5 +35,17 @@ router.put(
 );
 
 router.delete("/:id", authMiddleware(["admin"]), productController.deleteProduct);
+
+// Upload image or video
+router.post("/upload", upload.single("file"), (req, res) => {
+  try {
+    res.json({
+      message: "File uploaded successfully!",
+      url: req.file.path, // Cloudinary URL
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
 
 module.exports = router;

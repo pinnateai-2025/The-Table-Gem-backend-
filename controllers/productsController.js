@@ -81,7 +81,7 @@ exports.createProduct = async (req, res, next) => {
       description,
       price,
       stock,
-      imageUrl,
+      imageUrl: req.file ? req.file.path : null,
       categoryId,
       createdBy: req.user.id,
     });

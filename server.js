@@ -12,7 +12,6 @@ app.use(morgan("dev"));
 
 app.use("/api", route);
 
-// error handler (always last)
 app.use(errorHandler);
 
 sequelize.sync({ alter: true }).then(() => {

@@ -12,6 +12,8 @@ db.Category = require("./categoriesModel")(sequelize, DataTypes);
 db.Product = require("./productsModel")(sequelize, DataTypes);
 db.Cart = require("./cartModel")(sequelize, DataTypes);
 db.CartItem = require("./cartItemsModel")(sequelize, DataTypes);
+db.Order = require("./ordersModel")(sequelize, DataTypes);
+db.OrderItem = require("./orderItemsModel")(sequelize, DataTypes);
 
 // Apply associations
 applyAssociations(db);
