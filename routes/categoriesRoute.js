@@ -8,6 +8,7 @@ const router = express.Router();
 // Public
 router.get("/", categoryController.getAllCategories);
 router.get("/:id", categoryController.getCategory);
+router.get("/:id/subcategories", categoryController.getSubcategories);
 
 // Admin Only
 router.post(
@@ -15,6 +16,13 @@ router.post(
   authMiddleware(["admin"]),
   [body("name").notEmpty().withMessage("Name is required")],
   categoryController.createCategory
+);
+
+router.post(
+  "/:id/subcategories",
+  authMiddleware(["admin"]),
+  [body("name").notEmpty().withMessage("Name is required")],
+  categoryController.createSubcategory
 );
 
 router.put(

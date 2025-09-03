@@ -2,7 +2,7 @@
   "development": {
     "username": "root",
     "password": "root",
-    "database": "the_table_gem",
+    "database": "tableGem",
     "host": "127.0.0.1",
     "dialect": "mysql"
   },

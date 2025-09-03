@@ -12,6 +12,8 @@ app.use(morgan("dev"));
 
 app.use("/api", route);
 
+app.use('/public', express.static('public'));
+
 app.use(errorHandler);
 
 sequelize.sync({ alter: true }).then(() => {
