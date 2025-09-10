@@ -1,5 +1,5 @@
 const applyAssociations = (db) => {
-  const { User, Product, Category, Cart, CartItem, Order, OrderItem } = db;
+  const { User, Product, Category, Cart, CartItem, Order, OrderItem , Payment } = db;
 
   // ================= USER ↔ CART =================
   User.hasOne(Cart, { foreignKey: "userId", onDelete: "CASCADE", as: "cart" });
@@ -37,6 +37,11 @@ const applyAssociations = (db) => {
   // ================= PRODUCT ↔ ORDERITEM =================
   Product.hasMany(OrderItem, { foreignKey: "productId", as: "orderItems" });
   OrderItem.belongsTo(Product, { foreignKey: "productId", as: "product" });
+
+ // ================= Order ↔ Payment =================
+Order.hasOne(Payment, { foreignKey: "orderId", as: "payment" });
+Payment.belongsTo(Order, { foreignKey: "orderId", as: "order" });
+
 };
 
 module.exports = { applyAssociations };
